@@ -15,7 +15,9 @@ class ViewController: UIViewController {
     var gameStarted = false
     var playingVsComputer = false
     var virtualBoard = ["U", "U", "U", "U", "U", "U", "U", "U", "U"]
-    var moverCounter = 0
+    var moveCounter = 0
+    var gamePieces = [String : [UILabel]]()
+    var gameButtons = [UIButton]()
     
     
     // Home Screen //
@@ -24,7 +26,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var playerVComputerButton: UIButton!
     @IBOutlet weak var ticTacToeLabel: UILabel!
     
-    //board buttons
+    // Board Buttons //
     @IBOutlet weak var topLeftButton: UIButton!
     @IBOutlet weak var topCenterButton: UIButton!
     @IBOutlet weak var topRightButton: UIButton!
@@ -35,7 +37,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var bottomCenterButton: UIButton!
     @IBOutlet weak var bottomRightButton: UIButton!
     
-    //xs and os
+    // Xs and Os //
     @IBOutlet weak var topLeftX: UILabel!
     @IBOutlet weak var topLeftO: UILabel!
     @IBOutlet weak var topCenterO: UILabel!
@@ -57,6 +59,13 @@ class ViewController: UIViewController {
     @IBOutlet weak var playAgain: UIButton!
     @IBOutlet weak var winnerLabel: UILabel!
     
+    func populateGamePiecesDictionaryAndButtonArray() {
+        gamePieces["x"] = [topLeftX, topCenterX, topRightX, leftCenterX, centerX, centerRightX, bottomLeftX, bottomCenterX, bottomRightX]
+        gamePieces["o"] = [topLeftO, topCenterO, topRightO, leftCenterO, centerO, centerRightO, bottomLeftO, bottomCenterO, bottomRightO]
+        gameButtons = [topLeftButton, topCenterButton, topRightButton, centerLeftButton, centerButton, rightCenterButton, bottomLeftButton, bottomCenterButton, bottomRightButton]
+    
+    }
+    
     @IBAction func playAgainButton(_ sender: AnyObject) {
         gameStarted = false
         hideHomeScreen(x: gameStarted)
@@ -66,8 +75,6 @@ class ViewController: UIViewController {
     @IBAction func playerVPlayerButton(_ sender: AnyObject) {
         gameStarted = true
         hideHomeScreen(x: gameStarted)
-        
-        
     }
     
     @IBAction func playerVComputerButton(_ sender: AnyObject) {
@@ -75,38 +82,36 @@ class ViewController: UIViewController {
         gameStarted = true
         playingVsComputer = true
         hideHomeScreen(x: gameStarted)
-        
     }
     
     
     @IBAction func topLeftButton(_ sender: AnyObject) {
-        let xO = buttonClicked(x: topLeftX, o: topLeftO)
-        updateVirtualBoard(index: 0, xO: xO)
+        print("sender tag \(sender.tag)")
+        let indexOfClickedButton = sender.tag
+        let xO = selectedSegment(indexOfButton: indexOfClickedButton!)
+        updateVirtualBoard(index: indexOfClickedButton, xO: xO)
         updateComputerMove()
-        
     }
     
     @IBAction func topCenterButton(_ sender: AnyObject) {
+        print ("sender tag \(sender.tag)")
         let xO = buttonClicked(x: topCenterX, o: topCenterO)
         updateVirtualBoard(index: 1, xO: xO)
         updateComputerMove()
-        
+        let index = topCenterButton.tag
+        print("tag return int: \(index)")
     }
     
     @IBAction func topRightButton(_ sender: AnyObject) {
         let xO = buttonClicked(x: topRightX, o: topRightO)
         updateVirtualBoard(index: 2, xO: xO)
         updateComputerMove()
-        
-        
     }
     
     @IBAction func leftCenterButton(_ sender: AnyObject) {
         let xO = buttonClicked(x: leftCenterX, o: leftCenterO)
         updateVirtualBoard(index: 3, xO: xO)
         updateComputerMove()
-        
-        
     }
     
     @IBAction func centerButton(_ sender: AnyObject) {
@@ -139,16 +144,19 @@ class ViewController: UIViewController {
         updateComputerMove()
     }
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         hideXsAndOs(x: true)
         hideBoardButtons(x: false)
+        someoneWon = false
         winnerLabel.isHidden = true
         virtualBoard = ["U", "U", "U", "U", "U", "U", "U", "U", "U"]
         xOrO = true
         playingVsComputer = false
         playAgain.isHidden = true
-        moverCounter = 0
+        moveCounter = 0
+        populateGamePiecesDictionaryAndButtonArray()
         
         // Do any additional setup after loading the view, typically from a nib.
     }
@@ -194,27 +202,34 @@ class ViewController: UIViewController {
         return xO
     }
     
+    func selectedSegment(indexOfButton index: Int) -> String {
+        let xPiece = gamePieces["x"]?[index]
+        let oPiece = gamePieces["o"]?[index]
+        //let buttonPiece = gameButtons[index]
+        return buttonClicked(x: xPiece!, o: oPiece!)
+    }
+    
     func updateVirtualBoard(index: Int, xO: String) {
         virtualBoard[index] = xO
         checkForWinner(xO: "x")
         checkForWinner(xO: "o")
-        moverCounter += 1
-        print("Move counter \(moverCounter)")
+        moveCounter += 1
+        print("Move counter \(moveCounter)")
     }
     
     func checkForWinner(xO: String) {
         if
-            //across
+            // Across //
             virtualBoard[0] == xO && virtualBoard[1] == xO && virtualBoard[2] == xO ||
-                virtualBoard[3] == xO && virtualBoard[4] == xO && virtualBoard[5] == xO ||
-                virtualBoard[6] == xO && virtualBoard[7] == xO && virtualBoard[8] == xO ||
-                //down
-                virtualBoard[0] == xO && virtualBoard[3] == xO && virtualBoard[6] == xO ||
-                virtualBoard[1] == xO && virtualBoard[4] == xO && virtualBoard[7] == xO ||
-                virtualBoard[2] == xO && virtualBoard[5] == xO && virtualBoard[8] == xO ||
-                //diagonal
-                virtualBoard[2] == xO && virtualBoard[4] == xO && virtualBoard[6] == xO ||
-                virtualBoard[0] == xO && virtualBoard[4] == xO && virtualBoard[8] == xO {
+            virtualBoard[3] == xO && virtualBoard[4] == xO && virtualBoard[5] == xO ||
+            virtualBoard[6] == xO && virtualBoard[7] == xO && virtualBoard[8] == xO ||
+            // Down //
+            virtualBoard[0] == xO && virtualBoard[3] == xO && virtualBoard[6] == xO ||
+            virtualBoard[1] == xO && virtualBoard[4] == xO && virtualBoard[7] == xO ||
+            virtualBoard[2] == xO && virtualBoard[5] == xO && virtualBoard[8] == xO ||
+            // Diagonal //
+            virtualBoard[2] == xO && virtualBoard[4] == xO && virtualBoard[6] == xO ||
+            virtualBoard[0] == xO && virtualBoard[4] == xO && virtualBoard[8] == xO {
             winnerLabel.text = "\(xO.capitalized) Wins!"
             winnerLabel.isHidden = false
             playAgain.isHidden = false
@@ -222,15 +237,14 @@ class ViewController: UIViewController {
             hideBoardButtons(x: someoneWon)
         }
         
-        if moverCounter == 9 {
+        if moveCounter == 9 && !someoneWon {
             winnerLabel.text = "DRAW!"
             winnerLabel.isHidden = false
             playAgain.isHidden = false
             someoneWon = true
             hideBoardButtons(x: someoneWon)
         }
-        
-        
+    
     }
     
     func hideBoardButtons (x: Bool) {
@@ -289,7 +303,7 @@ class ViewController: UIViewController {
                 break
             case 5:
                 let xO = buttonClicked(x: bottomLeftX, o: bottomLeftO)
-                updateVirtualBoard(index: 6, xO: xO)
+                updateVirtualBoard(index: 5, xO: xO)
                 break
             case 6:
                 let xO = buttonClicked(x: bottomLeftX, o: bottomLeftO)
@@ -317,11 +331,7 @@ class ViewController: UIViewController {
             computerMove()
         }
     }
-    
-    
-    
-    
-    
+  
     
 }
 
