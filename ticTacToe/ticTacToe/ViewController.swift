@@ -89,7 +89,7 @@ class ViewController: UIViewController {
         print("sender tag \(sender.tag)")
         let indexOfClickedButton = sender.tag
         let xO = selectedSegment(indexOfButton: indexOfClickedButton!)
-        updateVirtualBoard(index: indexOfClickedButton, xO: xO)
+        updateVirtualBoard(index: indexOfClickedButton!, xO: xO)
         updateComputerMove()
     }
     
